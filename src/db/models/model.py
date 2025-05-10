@@ -69,13 +69,9 @@ class Enumerator(db.Model):
 
 class Section(db.Model):
     __tablename__ = 'sections'
-    # id = db.Column(db.Integer, primary_key=True)
-    # title = db.Column(db.String(255), nullable=False)
-    # created_at = db.Column(db.TIMESTAMP, server_default=func.current_timestamp())
-
-    id = Column(Integer, primary_key=True)
-    title = Column(String(255), nullable=False)
-    created_at = Column(TIMESTAMP, server_default=func.current_timestamp())
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.TIMESTAMP, server_default=func.current_timestamp())
 
     # Relationship to QuestionBase (assuming one-to-many)
     questions = relationship('QuestionBase', back_populates='section')

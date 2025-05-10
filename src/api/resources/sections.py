@@ -51,18 +51,10 @@ class SectionListResource(Resource):
     #     section_list = [{'id': section.id, 'name': section.title} for section in sections]
     #     return {'total': total_sections, 'Sections': section_list}, 200
     async def get(self):
-        # async with get_async_session() as session:
-        #     result = await session.execute(select(Section))
-        #     sections = await result.scalars().all()
-        #     data = [section.to_dict() for section in sections]
-        #     return {'sections': data}, 200
-
         async with get_async_session() as session:
             result = await session.execute(select(Section))
             sections = await result.scalars().all()
-
-            # Serialize using Marshmallow
-            data = sections_schema.dump(sections)
+            data = sections_schema.dump(sections)  # Serialize to JSON-compatible dict
             return {'sections': data}, 200
 
     def post(self):

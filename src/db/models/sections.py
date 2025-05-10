@@ -13,7 +13,7 @@ class Section(db.Model):
         """Convert object to JSON-serializable format"""
         return {
             'id': self.id,
-            'name': self.title
+            'title': self.title
         }
 
 # class Section(db.Model):
