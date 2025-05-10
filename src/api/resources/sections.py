@@ -1,11 +1,10 @@
-from flask import request, Blueprint
-from flask_restful import Resource, Api
+from flask import request, jsonify
+from flask_restful import Resource
+from ...db.async_core import get_async_session
 from ...db.models.model import Section
+from ...db.msSchemas.schemas import section_schema, sections_schema
 from ...db.core import db
-
-# # Blueprint for section routes
-# sections_bp = Blueprint('sections', __name__)
-# api = Api(sections_bp)
+from sqlalchemy.future import select
 
 
 class SectionResource(Resource):
@@ -46,11 +45,25 @@ class SectionResource(Resource):
 class SectionListResource(Resource):
     """Handle collection of sections"""
 
-    def get(self):
-        sections = Section.query.all()
-        total_sections = Section.query.count()
-        section_list = [{'id': section.id, 'name': section.title} for section in sections]
-        return {'total': total_sections, 'Sections': section_list}, 200
+    # def get(self):
+    #     sections = Section.query.all()
+    #     total_sections = Section.query.count()
+    #     section_list = [{'id': section.id, 'name': section.title} for section in sections]
+    #     return {'total': total_sections, 'Sections': section_list}, 200
+    async def get(self):
+        # async with get_async_session() as session:
+        #     result = await session.execute(select(Section))
+        #     sections = await result.scalars().all()
+        #     data = [section.to_dict() for section in sections]
+        #     return {'sections': data}, 200
+
+        async with get_async_session() as session:
+            result = await session.execute(select(Section))
+            sections = await result.scalars().all()
+
+            # Serialize using Marshmallow
+            data = sections_schema.dump(sections)
+            return {'sections': data}, 200
 
     def post(self):
         data = request.get_json()
@@ -64,8 +77,3 @@ class SectionListResource(Resource):
         db.session.add(new_section)
         db.session.commit()
         return new_section.serialize(), 201
-
-
-# # Register resources with the API inside the blueprint
-# api.add_resource(SectionListResource, '/sections')
-# api.add_resource(SectionResource, '/sections/<int:section_id>')

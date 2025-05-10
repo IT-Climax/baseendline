@@ -1,29 +1,42 @@
-from flask import Flask
+from flask import Flask, g
 from .config import Config
-from .db.core import db, jwt, migrate, cors, bcrypt
+from .db.async_core import init_async_db, app_specific_setup
 from .api.resources import init_app
-from .db.models import RoleEnum, GenderEnum, User, Section, Participant, Enumerator, QuestionPhase, QuestionBase, QuestionOptions, QuestionAnswer, \
-    AnswerOptionSelected
-from .scripts.upload_education_question import upload_education_questions
+from .db.core import ma, jwt, cors, bcrypt, migrate
+
+import asyncio
 
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
-    db.init_app(app)
-    migrate.init_app(app, db)
+    init_async_db(app)
+    ma.init_app(app)
+    jwt.init_app(app)
+    cors.init_app(app, resources={r"/*": {"origins": "*"}})
+    bcrypt.init_app(app)
+    migrate.init_app(app, None)  # None if using async
 
-    with app.app_context():
-        db.create_all()
-        jwt.init_app(app)
-        cors.init_app(app, resources={r"/*": {"origins": "*"}})
-        bcrypt.init_app(app)
-        init_app(app)
-        # # Upload Questions
-        upload_education_questions()
+    # Async context for creating tables and preloading Excel questions
+    async def async_setup():
+        await app_specific_setup()  # This should create tables and preload questions
+
+        # Run async setup synchronously at startup
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(app_specific_setup())
+            loop.close()
+        else:
+            # If already running loop (e.g. in ASGI), schedule and wait
+            loop.run_until_complete(app_specific_setup())
+
+    init_app(app)
 
     @app.route('/')
-    def home():
+    async def home():
         return {'message': 'Survey in Class API Running'}
 
     return app

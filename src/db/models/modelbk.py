@@ -1,4 +1,4 @@
-from sqlalchemy import func, Column, Integer, String, TIMESTAMP
+from sqlalchemy import func, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from ..core import db
 from enum import Enum
@@ -69,30 +69,10 @@ class Enumerator(db.Model):
 
 class Section(db.Model):
     __tablename__ = 'sections'
-    # id = db.Column(db.Integer, primary_key=True)
-    # title = db.Column(db.String(255), nullable=False)
-    # created_at = db.Column(db.TIMESTAMP, server_default=func.current_timestamp())
-
-    id = Column(Integer, primary_key=True)
-    title = Column(String(255), nullable=False)
-    created_at = Column(TIMESTAMP, server_default=func.current_timestamp())
-
-    # Relationship to QuestionBase (assuming one-to-many)
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.TIMESTAMP, server_default=func.current_timestamp())
     questions = relationship('QuestionBase', back_populates='section')
-
-    # questions = relationship('QuestionBase', back_populates='section')
-
-    def to_dict(self, include_questions=False):
-        section_dict = {
-            'id': self.id,
-            'title': self.title,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-        }
-
-        if include_questions:
-            section_dict['questions'] = [q.to_dict() for q in self.questions]
-
-        return section_dict
 
 
 class QuestionPhase(db.Model):
@@ -101,8 +81,6 @@ class QuestionPhase(db.Model):
     title = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.TIMESTAMP, server_default=func.current_timestamp())
     questions = relationship('QuestionBase', back_populates='phase')
-
-
 
 
 class QuestionBase(db.Model):
@@ -125,13 +103,6 @@ class QuestionBase(db.Model):
     parent = relationship('QuestionBase', remote_side=[id], backref='children')
     options = db.relationship('QuestionOptions', back_populates='question', lazy=True,
                               foreign_keys='QuestionOptions.question_id')
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'title': self.title,
-            'type': self.type
-        }
 
 
 class QuestionOptions(db.Model):
