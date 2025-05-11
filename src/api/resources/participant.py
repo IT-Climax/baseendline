@@ -15,14 +15,14 @@ class ParticipantRegistrationResource(Resource):
     @role_required('ENUMERATOR', 'ADMIN', 'SUPER_ADMIN')
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('age', type=int, required=True)
-        parser.add_argument('marital_status', type=str, required=True)
-        parser.add_argument('location', type=str, required=True)
-        parser.add_argument('education', type=str, required=True)
-        parser.add_argument('highest_formal_education', type=str, required=True)
-        parser.add_argument('coordinates', type=str)
+        parser.add_argument('age', type=int, required=True, help="Age is required")
+        parser.add_argument('marital_status', type=str, required=True, help="Marital status is required")
+        parser.add_argument('location', type=str, required=True, help="Location is required")
+        parser.add_argument('education', type=str, required=True, help="Select one")
+        parser.add_argument('highest_edu', type=str, required=True, help="Highest level of education is required")
+        parser.add_argument('coordinate', type=str)
         parser.add_argument('nin', type=str)
-        parser.add_argument('status', type=str)
+        parser.add_argument('gender', type=str, required=True, help="Gender is required")
         args = parser.parse_args()
 
         user_id = get_jwt_identity()
@@ -32,10 +32,10 @@ class ParticipantRegistrationResource(Resource):
             marital_status=args['marital_status'],
             location=args['location'],
             education=args['education'],
-            highest_formal_education=args['highest_formal_education'],
-            coordinates=args.get('coordinates'),
+            highest_formal_education=args['highest_edu'],
+            coordinates=args.get('coordinate'),
             nin=args.get('nin'),
-            status=args.get('status'),
+            status=args.get('gender'),
             submitted_at=datetime.utcnow().isoformat()
         )
         db.session.add(participant)
@@ -130,12 +130,12 @@ class ParticipantAnswerResource(Resource):
         data = request.get_json()
         participant_id = data['participant_id']
         answers = data['answers']
-        enumerator_id = get_jwt_identity()
+        # enumerator_id = get_jwt_identity()
 
         for ans in answers:
             answer = QuestionAnswer(
                 participant_id=participant_id,
-                enumerator_id=enumerator_id,
+                # enumerator_id=enumerator_id,
                 question_id=ans['question_id'],
                 answer=ans['answer'],
                 created_at=datetime.utcnow()

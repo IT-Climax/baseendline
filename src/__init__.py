@@ -11,7 +11,8 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     db.init_app(app)
-    migrate.init_app(app, db)
+    migrate.init_app(app, db, render_as_batch=True)
+    # migrate = Migrate(app, db, render_as_batch=True)
 
     with app.app_context():
         db.create_all()
@@ -21,6 +22,7 @@ def create_app():
         init_app(app)
         # # Upload Questions
         upload_education_questions()
+
 
     @app.route('/')
     def home():

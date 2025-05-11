@@ -30,14 +30,14 @@ class User(db.Model):
     user_type = db.Column(db.Enum(RoleEnum), nullable=False)
     created_at = db.Column(db.TIMESTAMP, server_default=func.current_timestamp())
 
-    enumerator = relationship('Enumerator', uselist=False, back_populates='user')
-    participant = relationship('Participant', uselist=False, back_populates='user')
+    enumerator = relationship('Enumerator', back_populates='user')
+    participant = relationship('Participant', back_populates='user')
 
 
 class Participant(db.Model):
     __tablename__ = 'participants'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     age = db.Column(db.Integer, nullable=False)
     nin = db.Column(db.String(255), nullable=True)
     marital_status = db.Column(db.String(255), nullable=False)
@@ -45,7 +45,7 @@ class Participant(db.Model):
     education = db.Column(db.String(255), nullable=False)
     submitted_at = db.Column(db.String(255), nullable=False)
     highest_formal_education = db.Column(db.String(255), nullable=False)
-    status = db.Column(db.String(255))
+    status = db.Column(db.String(255), nullable=False)
     coordinates = db.Column(db.String(255))
     created_at = db.Column(db.TIMESTAMP, server_default=func.current_timestamp())
 
@@ -56,13 +56,13 @@ class Participant(db.Model):
 class Enumerator(db.Model):
     __tablename__ = 'enumerators'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     photo_url = db.Column(db.String(255), nullable=True)
     status = db.Column(db.String(255), default="active")
     created_at = db.Column(db.TIMESTAMP, server_default=func.current_timestamp())
 
     user = relationship('User', back_populates='enumerator')
-    answers = relationship('QuestionAnswer', back_populates='enumerator')
+    # answers = relationship('QuestionAnswer', back_populates='enumerator')
 
 
 class Section(db.Model):
@@ -126,13 +126,11 @@ class QuestionAnswer(db.Model):
     __tablename__ = 'question_answer'
     id = db.Column(db.Integer, primary_key=True)
     participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'), nullable=False)
-    enumerator_id = db.Column(db.Integer, db.ForeignKey('enumerators.id'), nullable=False)
     question_id = db.Column(db.Integer, db.ForeignKey('question_base.id'), nullable=False)
     answer = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.TIMESTAMP, server_default=func.current_timestamp())
 
     participant = relationship('Participant', back_populates='answers')
-    enumerator = relationship('Enumerator', back_populates='answers')
     question = relationship('QuestionBase')
     selected_options = relationship('AnswerOptionSelected', back_populates='answer')
 

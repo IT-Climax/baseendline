@@ -2,6 +2,7 @@ from flask import Blueprint
 from flask_restful import Api
 from .auth import RegisterResource, LoginResource, ProfileResource, ChangePassword
 from .sections import SectionListResource, SectionResource
+# from .sections import sections_bp
 from .user import UserResource, UserListResource
 from .participant import ParticipantRegistrationResource, ParticipantQuestionsResource, ParticipantAnswerResource
 
@@ -20,6 +21,7 @@ api.add_resource(ChangePassword, '/auth/change-password')
 # Sections
 api.add_resource(SectionListResource, '/sections')
 api.add_resource(SectionResource, '/section/<int:section_id>')
+
 
 # users
 api.add_resource(UserListResource, '/users')
