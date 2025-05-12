@@ -5,9 +5,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import (
     create_access_token, jwt_required, get_jwt_identity
 )
-from survey.src.db.models.model import User, RoleEnum
-from survey.src.db.core import db
-from survey.src.utils.auth import role_required
+
+from ...db.models.model import User, RoleEnum
+from ...db.core import db
+from ...utils.auth import role_required
 
 register_parser = reqparse.RequestParser()
 register_parser.add_argument('first_name', type=str, required=True, help='First name is required')

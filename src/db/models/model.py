@@ -99,8 +99,6 @@ class QuestionPhase(db.Model):
     questions = relationship('QuestionBase', back_populates='phase')
 
 
-
-
 class QuestionBase(db.Model):
     __tablename__ = 'question_base'
     id = db.Column(db.Integer, primary_key=True)
