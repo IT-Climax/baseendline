@@ -66,6 +66,30 @@ class LoginResource(Resource):
                }, 200
 
 
+class LoginResource(Resource):
+    def post(self):
+        args = login_parser.parse_args()
+        user = User.query.filter_by(email=args['email']).first()
+        if not user or not check_password_hash(user.password, args['password']):
+            return {'message': 'Invalid credentials'}, 401
+
+        access_token = create_access_token(identity=user.id)
+
+        # Include user profile info in login response
+        return {
+            'access_token': access_token,
+            'user': {
+                'id': user.id,
+                'first_name': user.first_name,
+                'middle_name': user.middle_name,
+                'last_name': user.last_name,
+                'email': user.email,
+                'gender': user.gender.name if hasattr(user.gender, 'name') else user.gender,
+                'user_type': user.user_type.name
+            }
+        }, 200
+
+
 class ProfileResource(Resource):
     @jwt_required()
     def get(self):
