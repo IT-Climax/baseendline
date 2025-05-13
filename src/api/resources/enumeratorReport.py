@@ -1,8 +1,8 @@
-from flask import Blueprint, request, jsonify
-from flask_restful import Api, Resource
+from flask import request
+from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from sqlalchemy import func, and_, cast, Date, Time
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
+from sqlalchemy import cast, Date
 from ...db.core import db
 from ...db.models import Participant, User, RoleEnum
 
@@ -11,22 +11,22 @@ class EnumeratorDailyReportResource(Resource):
     @jwt_required()
     def get(self):
         """
-        {
-          "enumerator_id": 12,
-          "date": "2025-05-12",
-          "total_participants": 15,
-          "first_recorded_at": "2025-05-12T08:15:23.456789",
-          "last_recorded_at": "2025-05-12T16:45:10.123456",
-          "cumulative_participants": 234
-        }
-        """
+        Get daily report for enumerator:
+        - total participants recorded on the date within working hours (8am-5pm)
+        - first record timestamp during working hours
+        - last record timestamp during working hours
+        - cumulative total participants recorded up to and including the date
 
+        Query params:
+          date=YYYY-MM-DD (optional, defaults to today)
+          enumerator_id (optional, admins only)
+        """
         current_user_id = get_jwt_identity()
         user = User.query.get(current_user_id)
         if not user:
             return {'message': 'User not found'}, 404
 
-        # Parse date param or default to today
+        # Parse date parameter or default to today
         date_str = request.args.get('date')
         if date_str:
             try:
@@ -36,34 +36,32 @@ class EnumeratorDailyReportResource(Resource):
         else:
             report_date = datetime.utcnow().date()
 
-        # Determine enumerator to report on
+        # Determine which enumerator to report on
         enumerator_id = request.args.get('enumerator_id', type=int)
         if enumerator_id:
-            # Only admins can query other enumerators
+            # Only admins and super admins can query other enumerators
             if user.user_type not in [RoleEnum.ADMIN, RoleEnum.SUPER_ADMIN]:
                 return {'message': 'Access forbidden'}, 403
         else:
             enumerator_id = current_user_id
 
-        # Working hours boundaries
-        start_time = time(8, 0, 0)
-        end_time = time(17, 0, 0)
+        # Define working hours datetime range for the report date
+        start_datetime = datetime.combine(report_date, time(8, 0, 0))
+        end_datetime = datetime.combine(report_date, time(17, 0, 0))
 
         # Query participants recorded by enumerator on the date within working hours
-        participants_query = db.session.query(Participant).filter(
+        daily_query = db.session.query(Participant).filter(
             Participant.user_id == enumerator_id,
-            cast(Participant.submitted_at, Date) == report_date,
-            and_(
-                cast(Participant.submitted_at, Time) >= start_time,
-                cast(Participant.submitted_at, Time) <= end_time
-            )
+            Participant.submitted_at >= start_datetime,
+            Participant.submitted_at <= end_datetime
         )
 
-        total_participants = participants_query.count()
+        total_participants = daily_query.count()
 
-        first_record = participants_query.order_by(Participant.submitted_at.asc()).first()
-        last_record = participants_query.order_by(Participant.submitted_at.desc()).first()
-        # Cumulative participants up to and including report_date (all times)
+        first_record = daily_query.order_by(Participant.submitted_at.asc()).first()
+        last_record = daily_query.order_by(Participant.submitted_at.desc()).first()
+
+        # Cumulative participants up to and including the report date (all times)
         cumulative_count = db.session.query(Participant).filter(
             Participant.user_id == enumerator_id,
             cast(Participant.submitted_at, Date) <= report_date

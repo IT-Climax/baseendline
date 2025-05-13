@@ -12,7 +12,9 @@ def role_required(*roles):
             user_id = get_jwt_identity()
             user = User.query.get(user_id)
             if user is None or user.user_type.name not in roles:
-                return jsonify({"msg": "Access forbidden: insufficient permissions"}), 403
+                return {"msg": "Access forbidden: insufficient permissions"}, 403
             return fn(*args, **kwargs)
         return wrapper
     return decorator
+
+

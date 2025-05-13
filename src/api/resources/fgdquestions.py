@@ -1,9 +1,10 @@
 import os
 import json
+import logging
 from flask import request, current_app
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from ...db import db
+from ...db.core import db
 from ...db.models import ParticipantClass, FGDQuestion, FGDQuestionOption, FGDParticipant, FGDAnswer, User, RoleEnum
 from ...utils.auth import role_required
 
@@ -32,9 +33,6 @@ class FGDQuestionsFileUploadResource(Resource):
 
         if 'classes' not in data:
             return {'message': 'Invalid JSON format: missing "classes"'}, 400
-
-        # Delete all existing questions, options, and participant classes (fresh start)
-        # Note: cascade delete should be configured in your models
         FGDQuestionOption.query.delete()
         FGDQuestion.query.delete()
         ParticipantClass.query.delete()
@@ -157,12 +155,11 @@ class FGDQuestionsDeleteAllResource(Resource):
 
 class FGDQuestionsResource(Resource):
     @jwt_required()
-    @role_required('ADMIN', 'SUPER_ADMIN')
+    @role_required('ENUMERATOR', 'ADMIN', 'SUPER_ADMIN')
     def get(self, participant_class_id):
-        """
-        Get all questions and options for a participant class.
-        """
-        participant_class = ParticipantClass.query.get_or_404(participant_class_id)
+        participant_class = ParticipantClass.query.get(participant_class_id)
+        if participant_class is None:
+            return {"msg": "Participant class not in the system"}, 404
 
         questions = FGDQuestion.query.filter_by(
             participant_class_id=participant_class.id
@@ -184,11 +181,12 @@ class FGDQuestionsResource(Resource):
                     for opt in options
                 ]
             result.append(q_data)
-
-        return {
+        response = {
             'participant_class': participant_class.name,
             'questions': result
-        }, 200
+        }
+        logging.debug(f"FGDQuestionsResource response: {response}")
+        return response, 200
 
 
 class FGDSubmitAnswersResource(Resource):

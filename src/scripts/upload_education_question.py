@@ -147,7 +147,6 @@ def upload_education_questions():
             section_id=section.id,
             parent_question_id=q["parent_question_id"],
             phase_id=phase.id,
-            # question_type2="single",  # Or "multiple" if you use this
             is_required=False,
             display_order=int(q["question_id"]),
             tags=q["tags"],
