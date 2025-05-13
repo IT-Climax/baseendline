@@ -5,6 +5,9 @@ from .sections import SectionListResource, SectionResource
 # from .sections import sections_bp
 from .user import UserResource, UserListResource
 from .participant import ParticipantRegistrationResource, ParticipantQuestionsResource, ParticipantAnswerResource
+from .fgdquestions import FGDQuestionsFileUploadResource, FGDQuestionUpdateResource, FGDQuestionsDeleteAllResource, \
+    FGDQuestionsResource, FGDSubmitAnswersResource
+from .enumeratorReport import EnumeratorDailyReportResource
 
 # Create blueprint for auth routes
 bp = Blueprint('auth', __name__, url_prefix='/api')
@@ -31,6 +34,15 @@ api.add_resource(UserResource, '/user/<int:user_id>')
 api.add_resource(ParticipantRegistrationResource, '/participant/register')
 api.add_resource(ParticipantQuestionsResource, '/participant/questions')
 api.add_resource(ParticipantAnswerResource, '/participant/answers')
+
+api.add_resource(FGDQuestionsFileUploadResource, '/upload-fgd')
+api.add_resource(FGDQuestionUpdateResource, '/fgd-question/<int:question_id>')
+api.add_resource(FGDQuestionsDeleteAllResource, '/delete-all-fgd')
+api.add_resource(FGDQuestionsResource, '/fgd-get-questions/<int:participant_class_id>')
+api.add_resource(FGDSubmitAnswersResource, '/fgd-response')
+
+# Enumerator Report
+api.add_resource(EnumeratorDailyReportResource, '/report-enumerator')
 
 
 def init_app(app):

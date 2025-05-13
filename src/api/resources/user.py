@@ -116,6 +116,11 @@ class UserResource(Resource):
     @role_required('SUPER_ADMIN')
     def delete(self, user_id):
         user = User.query.get_or_404(user_id)
+        participant_count = Participant.query.filter_by(user_id=user.id).count()
+        if participant_count > 0:
+            return {
+                       'message': 'Unable to delete user: user has registered participants.'
+                   }, 400
         db.session.delete(user)
         db.session.commit()
 
