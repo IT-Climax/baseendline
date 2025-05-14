@@ -4,7 +4,8 @@ from .auth import RegisterResource, LoginResource, ProfileResource, ChangePasswo
 from .sections import SectionListResource, SectionResource
 # from .sections import sections_bp
 from .user import UserResource, UserListResource
-from .participant import ParticipantRegistrationResource, ParticipantQuestionsResource, ParticipantAnswerResource
+from .participant import ParticipantRegistrationResource, ParticipantQuestionsResource, ParticipantAnswerResource, \
+    ParticipantPhaseQuestionsResource
 from .fgdquestions import FGDQuestionsFileUploadResource, FGDQuestionUpdateResource, FGDQuestionsDeleteAllResource, \
     FGDQuestionsResource, FGDSubmitAnswersResource
 from .enumeratorReport import EnumeratorDailyReportResource
@@ -34,6 +35,8 @@ api.add_resource(UserResource, '/user/<int:user_id>')
 api.add_resource(ParticipantRegistrationResource, '/participant/register')
 api.add_resource(ParticipantQuestionsResource, '/participant/questions')
 api.add_resource(ParticipantAnswerResource, '/participant/answers')
+api.add_resource(ParticipantPhaseQuestionsResource, '/participant/questions?phase=')
+# api.add_resource(ParticipantPhaseQuestionsResource, '/participant/questions?phase=Endline')
 
 api.add_resource(FGDQuestionsFileUploadResource, '/upload-fgd')
 api.add_resource(FGDQuestionUpdateResource, '/fgd-question/<int:question_id>')

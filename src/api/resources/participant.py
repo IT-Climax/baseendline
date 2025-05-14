@@ -8,6 +8,7 @@ from ...db.models.model import (
 )
 from ...utils.auth import role_required
 from datetime import datetime
+from sqlalchemy.orm import joinedload
 
 
 class ParticipantRegistrationResource(Resource):
@@ -107,6 +108,86 @@ class ParticipantQuestionsResource(Resource):
             'options': options
         }
 
+
+class ParticipantPhaseQuestionsResource(Resource):
+    @jwt_required()
+    @role_required('ENUMERATOR', 'ADMIN', 'SUPER_ADMIN')
+    def get(self):
+        """
+        Load all questions for a selected phase (Baseline or Endline) with flow logic.
+        Query param: ?phase=Baseline or ?phase=Endline (case-insensitive)
+        """
+        phase_name = request.args.get('phase', 'Baseline').strip().title()
+        phase = QuestionPhase.query.filter_by(title=phase_name).first()
+        if not phase:
+            return {'message': f'Phase "{phase_name}" not found'}, 404
+
+        # Get all sections
+        sections = Section.query.all()
+        result = []
+
+        for section in sections:
+            root_questions = QuestionBase.query.options(
+                joinedload(QuestionBase.options).joinedload(QuestionOptions.follow_up)
+            ).filter_by(
+                section_id=section.id,
+                phase_id=phase.id,
+                parent_question_id=None
+            ).order_by(QuestionBase.display_order).all()
+
+            if not root_questions:
+                continue
+
+            section_data = {
+                'section_id': section.id,
+                'section_title': section.title,
+                'questions': []
+            }
+            for root_q in root_questions:
+                q_data = self._process_question_with_children(root_q)
+                section_data['questions'].append(q_data)
+            result.append(section_data)
+
+        return {
+            'phase': phase_name,
+            'sections': result
+        }, 200
+
+    def _process_question_with_children(self, question, visited=None):
+        if visited is None:
+            visited = set()
+        if question.id in visited:
+            # Prevent infinite recursion
+            return {
+                'id': question.id,
+                'title': question.title,
+                'type': question.type,
+                'is_required': question.is_required,
+                'tags': question.tags,
+                'options': []
+            }
+        visited.add(question.id)
+
+        options = []
+        for opt in question.options:
+            opt_data = {
+                'id': opt.id,
+                'title': opt.title,
+                'follow_up_question_id': opt.follow_up_question_id,
+                'follow_up': None
+            }
+            if opt.follow_up_question_id and opt.follow_up:
+                opt_data['follow_up'] = self._process_question_with_children(opt.follow_up, visited)
+            options.append(opt_data)
+
+        return {
+            'id': question.id,
+            'title': question.title,
+            'type': question.type,
+            'is_required': question.is_required,
+            'tags': question.tags,
+            'options': options
+        }
 
 class ParticipantAnswerResource(Resource):
     @jwt_required()

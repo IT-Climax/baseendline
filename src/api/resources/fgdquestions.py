@@ -19,10 +19,6 @@ class FGDQuestionsFileUploadResource(Resource):
     @jwt_required()
     @role_required('ADMIN', 'SUPER_ADMIN')
     def post(self):
-        """
-        Load FGD questions from a JSON file on the server.
-        This endpoint deletes all existing questions and reloads fresh from file.
-        """
         # Path to JSON file
         json_path = os.path.join(current_app.root_path, 'scripts', 'fgd_questions.json')
         if not os.path.exists(json_path):
@@ -80,7 +76,6 @@ class FGDQuestionsFileUploadResource(Resource):
                             option_order=opt_order
                         )
                         db.session.add(option)
-
         db.session.commit()
         return {'message': 'FGD questions reloaded successfully from file'}, 201
 
@@ -118,7 +113,6 @@ class FGDQuestionUpdateResource(Resource):
 
         # Update options if question_type is multiple_choice
         if question.question_type == 'multiple_choice' and 'options' in data:
-            # Delete existing options
             FGDQuestionOption.query.filter_by(question_id=question.id).delete()
             db.session.flush()
 
@@ -142,10 +136,6 @@ class FGDQuestionsDeleteAllResource(Resource):
     @jwt_required()
     @role_required('ADMIN', 'SUPER_ADMIN')
     def delete(self):
-        """
-        Delete all FGD questions, options, and participant classes.
-        Use with caution.
-        """
         FGDQuestionOption.query.delete()
         FGDQuestion.query.delete()
         ParticipantClass.query.delete()
@@ -159,7 +149,7 @@ class FGDQuestionsResource(Resource):
     def get(self, participant_class_id):
         participant_class = ParticipantClass.query.get(participant_class_id)
         if participant_class is None:
-            return {"msg": "Participant class not in the system"}, 404
+            return {"message": "Participant class not in the system"}, 404
 
         questions = FGDQuestion.query.filter_by(
             participant_class_id=participant_class.id
@@ -191,29 +181,8 @@ class FGDQuestionsResource(Resource):
 
 class FGDSubmitAnswersResource(Resource):
     @jwt_required()
-    @role_required( 'ADMIN', 'SUPER_ADMIN')
+    @role_required('ADMIN', 'SUPER_ADMIN')
     def post(self):
-        """
-        Submit participant info and answers.
-        Expected JSON payload:
-        {
-            "participant_class_id": 1,
-            "participant": {
-                "name": "John Doe",
-                "gender": "Male",
-                "age": 35,
-                "contact_info": "john@example.com"
-            },
-            "answers": [
-                {
-                    "question_id": 10,
-                    "selected_option_id": 25,  # optional, for multiple_choice
-                    "answer_text": "Some text answer"  # optional, for text questions
-                },
-                ...
-            ]
-        }
-        """
         data = request.get_json()
         if not data:
             return {'message': 'Missing JSON payload'}, 400
@@ -225,12 +194,10 @@ class FGDSubmitAnswersResource(Resource):
         if not participant_class_id or not participant_info or not answers:
             return {'message': 'participant_class_id, participant info, and answers are required'}, 400
 
-        # Validate participant class
         participant_class = ParticipantClass.query.get(participant_class_id)
         if not participant_class:
             return {'message': 'Invalid participant_class_id'}, 400
 
-        # Create participant record
         participant = FGDParticipant(
             participant_class_id=participant_class_id,
             name=participant_info.get('name'),
@@ -241,8 +208,8 @@ class FGDSubmitAnswersResource(Resource):
         db.session.add(participant)
         db.session.flush()  # to get participant.id
 
-        # Current enumerator user id
-        enumerator_id = get_jwt_identity()
+        # # Current enumerator user id
+        # enumerator_id = get_jwt_identity()
 
         # Save answers
         for ans in answers:
