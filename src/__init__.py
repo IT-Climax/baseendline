@@ -25,7 +25,7 @@ def create_app():
 
     @app.route('/')
     def home():
-        return {'server': 'Application is Running'}
+        return {'msg': 'Application is Running'}
 
     @app.route('/details')
     def details():

@@ -47,6 +47,16 @@ api.add_resource(FGDSubmitAnswersResource, '/fgd-response')
 # Enumerator Report
 api.add_resource(EnumeratorDailyReportResource, '/report-enumerator')
 
+# Admin Report
+
+# Overview
+
+# Data table
+
+# Sectional
+
+# Settings
+
 
 def init_app(app):
     """Register the blueprint with the Flask app."""

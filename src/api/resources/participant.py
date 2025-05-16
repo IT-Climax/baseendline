@@ -113,10 +113,6 @@ class ParticipantPhaseQuestionsResource(Resource):
     @jwt_required()
     @role_required('ENUMERATOR', 'ADMIN', 'SUPER_ADMIN')
     def get(self):
-        """
-        Load all questions for a selected phase (Baseline or Endline) with flow logic.
-        Query param: ?phase=Baseline or ?phase=Endline (case-insensitive)
-        """
         phase_name = request.args.get('phase', 'Baseline').strip().title()
         phase = QuestionPhase.query.filter_by(title=phase_name).first()
         if not phase:
@@ -188,6 +184,7 @@ class ParticipantPhaseQuestionsResource(Resource):
             'tags': question.tags,
             'options': options
         }
+
 
 class ParticipantAnswerResource(Resource):
     @jwt_required()

@@ -1,0 +1,208 @@
+survey_saas/
+│
+├── .env                            # Environment variables configuration
+├── .env.example                    # Example environment variables
+├── .gitignore                      # Git ignore file
+├── pyproject.toml                  # Dependencies and project metadata
+├── README.md                       # Project documentation
+├── Dockerfile                      # Docker container configuration
+├── docker-compose.yml              # Docker services orchestration
+├── alembic.ini                     # Database migration configuration
+│
+├── app/                            # Application package
+│   ├── __init__.py                 # Package initializer
+│   ├── main.py                     # Application entry point
+│   ├── config.py                   # Configuration loading and validation
+│   ├── exceptions.py               # Custom exception handlers
+│   │
+│   ├── api/                        # API endpoints
+│   │   ├── __init__.py
+│   │   ├── router.py               # Main API router
+│   │   ├── dependencies.py         # Shared API dependencies
+│   │   │
+│   │   ├── v1/                     # API version 1
+│   │   │   ├── __init__.py
+│   │   │   ├── router.py
+│   │   │   ├── surveys/            # Survey endpoints
+│   │   │   ├── responses/          # Survey response endpoints
+│   │   │   ├── users/              # User management endpoints
+│   │   │   ├── analytics/          # Analytics endpoints
+│   │   │   ├── auth/               # Authentication endpoints
+│   │   │   ├── web3/               # Web3 integration endpoints
+│   │   │   ├── organizations/      # Organization/tenant management
+│   │   │   ├── subscriptions/      # Subscription management
+│   │   │   ├── billing/            # Billing and payment endpoints
+│   │   │   └── admin/              # Admin-only endpoints
+│   │   │
+│   │   ├── websockets/             # WebSocket endpoints
+│   │   │   ├── __init__.py
+│   │   │   └── router.py
+│   │   │
+│   │   └── middleware/             # API middleware
+│   │       ├── __init__.py
+│   │       ├── tenant.py           # Tenant resolution middleware
+│   │       ├── quota.py            # Rate limiting and quota enforcement
+│   │       └── auth.py             # Authentication middleware
+│   │
+│   ├── core/                       # Core application components
+│   │   ├── __init__.py
+│   │   ├── security.py             # Authentication and security
+│   │   ├── events.py               # Application events (startup/shutdown)
+│   │   ├── logging.py              # Logging configuration
+│   │   ├── tenancy.py              # Tenant context management
+│   │   ├── features.py             # Feature flag management
+│   │   └── permissions.py          # RBAC permission management
+│   │
+│   ├── db/                         # Database related code
+│   │   ├── __init__.py
+│   │   ├── session.py              # Database session management
+│   │   ├── base.py                 # Base model class
+│   │   ├── mixins/
+│   │   │   ├── __init__.py
+│   │   │   ├── tenant_mixin.py     # Tenant isolation mixin
+│   │   │   └── timestamps_mixin.py # Created/updated timestamps
+│   │   │
+│   │   └── repositories/           # Repository pattern implementations
+│   │       ├── __init__.py
+│   │       ├── base.py             # Base repository
+│   │       ├── tenant_base.py      # Tenant-aware base repository
+│   │       ├── surveys.py          # Survey repository
+│   │       ├── responses.py        # Response repository
+│   │       ├── users.py            # User repository
+│   │       ├── organizations.py    # Organization repository
+│   │       └── subscriptions.py    # Subscription repository
+│   │
+│   ├── models/                     # Database models
+│   │   ├── __init__.py
+│   │   ├── survey.py               # Survey model
+│   │   ├── response.py             # Survey response model
+│   │   ├── user.py                 # User model
+│   │   ├── web3_wallet.py          # Web3 wallet model
+│   │   ├── organization.py         # Organization/tenant model
+│   │   ├── subscription.py         # Subscription model
+│   │   ├── billing.py              # Billing and payment models
+│   │   ├── plan.py                 # Subscription plan model
+│   │   ├── tenant_settings.py      # Tenant-specific configurations
+│   │   └── usage.py                # Usage tracking model
+│   │
+│   ├── schemas/                    # Pydantic schemas for data validation
+│   │   ├── __init__.py
+│   │   ├── survey.py               # Survey schemas
+│   │   ├── response.py             # Response schemas
+│   │   ├── user.py                 # User schemas
+│   │   ├── auth.py                 # Authentication schemas
+│   │   ├── web3.py                 # Web3 related schemas
+│   │   ├── organization.py         # Organization schemas
+│   │   ├── subscription.py         # Subscription schemas
+│   │   ├── billing.py              # Billing schemas
+│   │   └── admin.py                # Admin operation schemas
+│   │
+│   ├── services/                   # Business logic and services
+│   │   ├── __init__.py
+│   │   ├── survey.py               # Survey service
+│   │   ├── response.py             # Response service
+│   │   ├── user.py                 # User service
+│   │   │
+│   │   ├── tenant/                 # Tenant management services
+│   │   │   ├── __init__.py
+│   │   │   ├── organization.py     # Organization management
+│   │   │   ├── provisioning.py     # New tenant setup
+│   │   │   └── isolation.py        # Tenant isolation logic
+│   │   │
+│   │   ├── billing/                # Billing and subscription services
+│   │   │   ├── __init__.py
+│   │   │   ├── subscription.py     # Subscription management
+│   │   │   ├── payment.py          # Payment processing
+│   │   │   ├── invoice.py          # Invoice generation
+│   │   │   └── integrations/       # Payment provider integrations
+│   │   │       ├── __init__.py
+│   │   │       ├── stripe.py       # Stripe integration
+│   │   │       └── paypal.py       # PayPal integration
+│   │   │
+│   │   ├── analytics/              # Analytics services
+│   │   │   ├── __init__.py
+│   │   │   ├── survey_metrics.py   # Survey-specific analytics
+│   │   │   ├── usage.py            # Usage tracking analytics
+│   │   │   └── business.py         # Business metrics
+│   │   │
+│   │   ├── ai/                     # AI integration services
+│   │   │   ├── __init__.py
+│   │   │   ├── insights.py         # AI insights for survey data
+│   │   │   ├── nlp.py              # Natural language processing
+│   │   │   └── recommendation.py   # Recommendation engine
+│   │   │
+│   │   └── web3/                   # Web3 related services
+│   │       ├── __init__.py
+│   │       ├── wallet.py           # Web3 wallet management
+│   │       ├── contracts.py        # Smart contract interactions
+│   │       └── incentives.py       # Web3 incentive mechanisms
+│   │
+│   ├── utils/                      # Utility functions
+│   │   ├── __init__.py
+│   │   ├── sync_manager.py         # Online/offline sync management
+│   │   ├── cache.py                # Caching utilities
+│   │   ├── helpers.py              # Miscellaneous helper functions
+│   │   └── notifications.py        # Notification utilities
+│   │
+│   └── worker/                     # Background tasks workers
+│       ├── __init__.py
+│       ├── celery_app.py           # Celery configuration
+│       ├── tasks.py                # Background task definitions
+│       ├── scheduler.py            # Scheduled tasks
+│       └── tenant_tasks.py         # Tenant-specific background tasks
+│
+├── tests/                          # Test directory
+│   ├── __init__.py
+│   ├── conftest.py                 # Test fixtures and configuration
+│   ├── factories.py                # Test data factories
+│   │
+│   ├── test_api/                   # API tests
+│   │   ├── __init__.py
+│   │   ├── test_surveys.py
+│   │   ├── test_responses.py
+│   │   ├── test_auth.py
+│   │   ├── test_organizations.py
+│   │   └── test_subscriptions.py
+│   │
+│   ├── test_services/              # Service tests
+│   │   ├── __init__.py
+│   │   ├── test_survey.py
+│   │   ├── test_ai.py
+│   │   ├── test_billing.py
+│   │   └── test_tenant.py
+│   │
+│   └── test_web3/                  # Web3 integration tests
+│       ├── __init__.py
+│       └── test_wallet.py
+│
+├── migrations/                     # Database migrations
+│   ├── env.py                      # Alembic environment
+│   ├── script.py.mako              # Migration script template
+│   └── versions/                   # Migration versions
+│
+├── scripts/                        # Utility scripts
+│   ├── seed_data.py                # Database seeding
+│   ├── start_dev.sh                # Development startup script
+│   ├── deploy.sh                   # Deployment script
+│   └── tenant_operations.py        # Tenant maintenance scripts
+│
+└── infrastructure/                 # Infrastructure as code
+    ├── terraform/                  # IaC for cloud resources
+    │   ├── main.tf
+    │   ├── variables.tf
+    │   └── outputs.tf
+    │
+    ├── kubernetes/                 # K8s deployment manifests
+    │   ├── deployment.yaml
+    │   ├── service.yaml
+    │   └── ingress.yaml
+    │
+    └── monitoring/                 # Monitoring and alerting setup
+        ├── prometheus/
+        │   └── config.yaml
+        ├── grafana/
+        │   └── dashboards/
+        └── alerts/
+            └── rules.yaml
+
+
