@@ -104,6 +104,7 @@ class ParticipantQuestionsResource(Resource):
             'title': question.title,
             'type': question.type,
             'is_required': question.is_required,
+            'parent_question_id': question.parent_question_id,
             'tags': question.tags,
             'options': options
         }
