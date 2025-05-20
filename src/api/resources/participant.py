@@ -90,7 +90,7 @@ class ParticipantQuestionsResource(Resource):
         for opt in QuestionOptions.query.filter_by(question_id=question.id).all():
             opt_data = {
                 'id': opt.id,
-                'title': opt.title,
+                'followup_title': opt.title,
                 'follow_up_question_id': opt.follow_up_question_id,
                 'follow_up': None
             }
