@@ -36,7 +36,6 @@ api.add_resource(ParticipantRegistrationResource, '/participant/register')
 api.add_resource(ParticipantQuestionsResource, '/participant/questions')
 api.add_resource(ParticipantAnswerResource, '/participant/answers')
 api.add_resource(ParticipantPhaseQuestionsResource, '/participant/questions?phase=')
-# api.add_resource(ParticipantPhaseQuestionsResource, '/participant/questions?phase=Endline')
 
 api.add_resource(FGDQuestionsFileUploadResource, '/upload-fgd')
 api.add_resource(FGDQuestionUpdateResource, '/fgd-question/<int:question_id>')

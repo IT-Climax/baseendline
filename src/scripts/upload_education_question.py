@@ -23,8 +23,6 @@ def upload_education_questions():
         db.session.commit()
     print(f"Phase ID for Baseline: {phase.id}")
 
-    # 3. Define questions and their follow-up logic
-    # The mapping below is based on your table and image
     questions_data = [
         {
             "question_id": 1,

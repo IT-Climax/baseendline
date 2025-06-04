@@ -25,7 +25,6 @@ class EnumeratorDailyReportResource(Resource):
         user = User.query.get(current_user_id)
         if not user:
             return {'message': 'User not found'}, 404
-
         # Parse date parameter or default to today
         date_str = request.args.get('date')
         if date_str:

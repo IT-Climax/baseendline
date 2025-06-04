@@ -110,6 +110,7 @@ class ParticipantQuestionsResource(Resource):
         }
 
 
+# Question with parameter string to filter the phase of the question (Baseline or Endline)
 class ParticipantPhaseQuestionsResource(Resource):
     @jwt_required()
     @role_required('ENUMERATOR', 'ADMIN', 'SUPER_ADMIN')
